@@ -2,11 +2,18 @@ package main
 
 import (
 	"fmt"
-	"time"
 )
 
-func main() {
-	fmt.Println("Ласкаво просимо на майданчик!")
+var c, d int = 1, 2
 
-	fmt.Println("Час -", time.Now(), "ми тут")
+func main() {
+	fmt.Println(abs(float64(c), float64(d)))
+}
+
+func abs(x, y float64) (float64, float64) {
+	var a, b float64
+	a = x + y
+	b = x - y
+	return a, b
+
 }
