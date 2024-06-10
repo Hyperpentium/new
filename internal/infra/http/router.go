@@ -10,7 +10,9 @@ import (
 
 	"github.com/BohdanBoriak/boilerplate-go-back/config"
 	"github.com/BohdanBoriak/boilerplate-go-back/config/container"
+	"github.com/BohdanBoriak/boilerplate-go-back/internal/app"
 	"github.com/BohdanBoriak/boilerplate-go-back/internal/infra/http/controllers"
+	"github.com/BohdanBoriak/boilerplate-go-back/internal/infra/http/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 
@@ -50,7 +52,7 @@ func Router(cont container.Container) http.Handler {
 				apiRouter.Use(cont.AuthMw)
 
 				UserRouter(apiRouter, cont.UserController)
-				PlantRouter(apiRouter, cont.PlantController)
+				PlantRouter(apiRouter, cont.PlantController, cont.PlantService)
 				apiRouter.Handle("/*", NotFoundJSON())
 			})
 		})
@@ -102,12 +104,14 @@ func UserRouter(r chi.Router, uc controllers.UserController) {
 	})
 }
 
-func PlantRouter(r chi.Router, pc controllers.PlantController) {
+func PlantRouter(r chi.Router, pc controllers.PlantController, ps app.PlantService) {
+	ppom := middlewares.PathObject("plantId", controllers.PlantKey, ps)
 	r.Route("/plants", func(apiRouter chi.Router) {
-		apiRouter.Post(
-			"/",
-			pc.Save(),
-		)
+		apiRouter.Post("/", pc.Save())
+		apiRouter.Get("/", pc.GetForUser())
+		apiRouter.With(ppom).Get("/{plantId}", pc.GetById())
+		apiRouter.With(ppom).Put("/{plantId}", pc.Update())
+		apiRouter.With(ppom).Delete("/{plantId}", pc.Delete())
 	})
 }
 

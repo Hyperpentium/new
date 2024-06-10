@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -40,5 +41,95 @@ func (c PlantController) Save() http.HandlerFunc {
 
 		var plantDto resources.PlantDto
 		Created(w, plantDto.DomainToDto(plant))
+	}
+}
+
+func (c PlantController) GetForUser() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(UserKey).(domain.User)
+		plants, err := c.plantService.GetForUser(user.Id)
+		if err != nil {
+			log.Printf("PlantController -> GetForUser : %s", err)
+			InternalServerError(w, err)
+			return
+		}
+
+		var plantsDto resources.PlantsDto
+		plantsDto = plantsDto.DomainToDtoCollection(plants)
+		Success(w, plants)
+	}
+}
+
+func (c PlantController) GetById() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(UserKey).(domain.User)
+		plant := r.Context().Value(PlantKey).(domain.Plant)
+
+		if user.Id != plant.UserId {
+			err := errors.New("acces denied")
+			Forbidden(w, err)
+			return
+
+		}
+		var plantDto resources.PlantDto
+		Success(w, plantDto.DomainToDto(plant))
+	}
+}
+
+func (c PlantController) Update() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(UserKey).(domain.User)
+		plantUpdate, err := requests.Bind(r, requests.AddPlantRequest{}, domain.Plant{})
+		if err != nil {
+			log.Printf("PlantController -> Save: %s", err)
+			BadRequest(w, err)
+			return
+		}
+		plant := r.Context().Value(PlantKey).(domain.Plant)
+
+		if user.Id != plant.UserId {
+			err := errors.New("acces denied")
+			Forbidden(w, err)
+			return
+
+		}
+		plant.Name = plantUpdate.Name
+		plant.Address = plant.Address
+		plant.Lat = plantUpdate.Lat
+		plant.Lon = plantUpdate.Lon
+		plant.Type = plantUpdate.Type
+
+		plant, err = c.plantService.Update(plant)
+		if err != nil {
+			log.Printf("PlantController -> Update: %s", err)
+			BadRequest(w, err)
+			return
+		}
+
+		var plantDto resources.PlantDto
+		Success(w, plantDto.DomainToDto(plant))
+	}
+}
+
+func (c PlantController) Delete() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		user := r.Context().Value(UserKey).(domain.User)
+		plant := r.Context().Value(PlantKey).(domain.Plant)
+
+		if user.Id != plant.UserId {
+			err := errors.New("acces denied")
+			Forbidden(w, err)
+			return
+
+		}
+
+		err := c.plantService.Delete(plant.Id)
+		if err != nil {
+			log.Printf("PlantController -> delete: %s", err)
+			BadRequest(w, err)
+			return
+		}
+
+		Ok(w)
 	}
 }

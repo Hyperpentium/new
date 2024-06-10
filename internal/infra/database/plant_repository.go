@@ -25,6 +25,9 @@ type plant struct {
 type PlantRepository interface {
 	Save(p domain.Plant) (domain.Plant, error)
 	GetForUser(uId uint64) ([]domain.Plant, error)
+	GetById(id uint64) (domain.Plant, error)
+	Update(p domain.Plant) (domain.Plant, error)
+	Delete(id uint64) error
 }
 
 type plantRepository struct {
@@ -63,6 +66,37 @@ func (r plantRepository) GetForUser(uId uint64) ([]domain.Plant, error) {
 
 	result := r.mapModelToDomainCollection(plants)
 	return result, nil
+}
+func (r plantRepository) GetById(id uint64) (domain.Plant, error) {
+	var pl plant
+	err := r.coll.
+		Find(db.Cond{"id": id, "deleted_date": nil}).
+		One(&pl)
+	if err != nil {
+		return domain.Plant{}, err
+	}
+
+	result := r.mapModelToDomain(pl)
+	return result, nil
+}
+
+func (r plantRepository) Update(p domain.Plant) (domain.Plant, error) {
+	pl := r.mapDomainToModel(p)
+	pl.CreatedDate = time.Now()
+	pl.UpdatedDate = time.Now()
+	err := r.coll.
+		Find(db.Cond{"id": pl.Id, "deleted_date": nil}).
+		Update(&pl)
+	if err != nil {
+		return domain.Plant{}, err
+	}
+
+	result := r.mapModelToDomain(pl)
+	return result, nil
+}
+
+func (r plantRepository) Delete(id uint64) error {
+	return r.coll.Find(db.Cond{"id": id, "deleted_date": nil}).Update(map[string]interface{}{"deleted_date": time.Now()})
 }
 
 func (r plantRepository) mapDomainToModel(p domain.Plant) plant {

@@ -27,6 +27,7 @@ type Middlewares struct {
 type Services struct {
 	app.AuthService
 	app.UserService
+	app.PlantService
 }
 
 type Controllers struct {
@@ -60,6 +61,7 @@ func New(conf config.Configuration) Container {
 		Services: Services{
 			authService,
 			userService,
+			plantService,
 		},
 		Controllers: Controllers{
 			authController,
