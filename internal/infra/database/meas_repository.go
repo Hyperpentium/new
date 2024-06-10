@@ -14,7 +14,7 @@ type measurement struct {
 	UpdatedDate time.Time
 	DeletedDate *time.Time
 }
-type measrepository interface {
+type Measrepository interface {
 	Save(p domain.Measurement) (domain.Measurement, error)
 	GetForUser(uId uint64) ([]domain.Measurement, error)
 	GetById(id uint64) (domain.Measurement, error)

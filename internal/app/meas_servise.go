@@ -7,7 +7,7 @@ import (
 	"github.com/BohdanBoriak/boilerplate-go-back/internal/infra/database"
 )
 
-type PlantService interface {
+type measservise interface {
 	Save(p domain.Plant) (domain.Plant, error)
 	GetForUser(uId uint64) ([]domain.Plant, error)
 	Find(id uint64) (interface{}, error)
@@ -15,52 +15,52 @@ type PlantService interface {
 	Delete(id uint64) error
 }
 
-type plantService struct {
-	plantRepo database.PlantRepository
+type measservise struct {
+	measrepo database.Measrepository
 }
 
-func NewPlantService(pr database.PlantRepository) PlantService {
-	return plantService{
-		plantRepo: pr,
+func Newmeasservise(pr database.Measrepository) measservise {
+	return measservise{
+		measrepo: pr,
 	}
 }
 
-func (s plantService) Save(p domain.Plant) (domain.Plant, error) {
-	plant, err := s.plantRepo.Save(p)
+func (s measservise) Save(p domain.Plant) (domain.Plant, error) {
+	plant, err := s.measrepo.Save(p)
 	if err != nil {
-		log.Printf("PlantService -> Save: %s", err)
+		log.Printf("measservise -> Save: %s", err)
 		return domain.Plant{}, err
 	}
 	return plant, nil
 }
-func (s plantService) GetForUser(uId uint64) ([]domain.Plant, error) {
-	plants, err := s.plantRepo.GetForUser(uId)
+func (s measservise) GetForUser(uId uint64) ([]domain.Plant, error) {
+	plants, err := s.measrepo.GetForUser(uId)
 	if err != nil {
-		log.Printf("PlantService -> Save: %s", err)
+		log.Printf("measservise -> Save: %s", err)
 		return nil, err
 	}
 	return plants, nil
 }
-func (s plantService) Find(id uint64) (interface{}, error) {
-	plant, err := s.plantRepo.GetById(id)
+func (s measservise) Find(id uint64) (interface{}, error) {
+	plant, err := s.measrepo.GetById(id)
 	if err != nil {
 
 		return domain.Plant{}, err
 	}
 	return plant, nil
 }
-func (s plantService) Update(p domain.Plant) (domain.Plant, error) {
-	plant, err := s.plantRepo.Update(p)
+func (s measservise) Update(p domain.Plant) (domain.Plant, error) {
+	plant, err := s.measrepo.Update(p)
 	if err != nil {
-		log.Printf("PlantService -> Update: %s", err)
+		log.Printf("measservise -> Update: %s", err)
 		return domain.Plant{}, err
 	}
 	return plant, nil
 }
-func (s plantService) Delete(id uint64) error {
-	err := s.plantRepo.Delete(id)
+func (s measservise) Delete(id uint64) error {
+	err := s.measrepo.Delete(id)
 	if err != nil {
-		log.Printf("PlantService -> Delete: %s", err)
+		log.Printf("measservise -> Delete: %s", err)
 		return err
 	}
 	return nil

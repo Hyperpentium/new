@@ -15,7 +15,7 @@ type Meascontroller struct {
 	plantService app.PlantService
 }
 
-func NewPlantController(ps app.PlantService) Meascontroller {
+func NewMeascontroller(ps app.PlantService) Meascontroller {
 	return Meascontroller{
 		plantService: ps,
 	}
